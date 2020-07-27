@@ -2,7 +2,7 @@
 
 import 'dart:io';
 
-import 'package:book_club/resources/images.dart';
+import 'package:bookclub/resources/images.dart';
 import 'package:test/test.dart';
 
 void main() {
