@@ -7,10 +7,10 @@ import 'utils/app_theme.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Locator.setup();
-  runApp(MyApp());
+  runApp(Application());
 }
 
-class MyApp extends StatelessWidget {
+class Application extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

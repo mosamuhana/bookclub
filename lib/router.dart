@@ -7,49 +7,48 @@ const String LOGIN_ROUTE = '/login';
 const String SIGNUP_ROUTE = '/signup';
 
 class _Routes {
-  final String login = '/login';
-  final String signup = '/signup';
-  Set<String> get all => {login, signup};
+  final String login = LOGIN_ROUTE;
+  final String signup = SIGNUP_ROUTE;
+  //Set<String> get all => {LOGIN_ROUTE, SIGNUP_ROUTE};
 }
 
-final _routes = <RouteDef>[
-  RouteDef(LOGIN_ROUTE, page: LoginView),
-  RouteDef(SIGNUP_ROUTE, page: SignupView),
-];
+Route<dynamic> _onLogin(RouteData data) {
+  var args = data.getArgs<LoginViewArgs>(orElse: () => LoginViewArgs());
+  return MaterialPageRoute<dynamic>(
+    builder: (context) => LoginView(
+      key: args.key,
+      //title: args.title,
+      //userId: data.pathParams['id'].intValue,
+    ),
+    settings: data,
+  );
+}
 
-final _pagesMap = <Type, AutoRouteFactory>{
-  LoginView: (data) {
-    var args = data.getArgs<LoginViewArguments>(orElse: () => LoginViewArguments());
-    return MaterialPageRoute<dynamic>(
-      builder: (context) => LoginView(
-        key: args.key,
-        //title: args.title,
-        //userId: data.pathParams['id'].intValue,
-      ),
-      settings: data,
-    );
-  },
-  SignupView: (data) {
-    var args = data.getArgs<SignupViewArguments>(orElse: () => SignupViewArguments());
-    return MaterialPageRoute<dynamic>(
-      builder: (context) => SignupView(key: args.key),
-      settings: data,
-    );
-  },
-};
+Route<dynamic> _onSignup(RouteData data) {
+  var args = data.getArgs<SignupViewArgs>(orElse: () => SignupViewArgs());
+  return MaterialPageRoute<dynamic>(
+    builder: (context) => SignupView(key: args.key),
+    settings: data,
+  );
+}
 
 class _Router extends RouterBase {
   @override
-  List<RouteDef> get routes => _routes;
+  List<RouteDef> get routes => [
+        RouteDef(LOGIN_ROUTE, page: LoginView),
+        RouteDef(SIGNUP_ROUTE, page: SignupView),
+      ];
 
   @override
-  Map<Type, AutoRouteFactory> get pagesMap => _pagesMap;
+  Map<Type, AutoRouteFactory> get pagesMap => {
+        LoginView: _onLogin,
+        SignupView: _onSignup,
+      };
 }
 
 class Router {
   static _Router _instance;
   static _Router get instance => _instance ??= _Router();
-
   static _Routes get routes => _Routes();
 }
 
@@ -58,27 +57,21 @@ class Router {
 /// *************************************************************************
 
 extension ExtendedNavigatorStateExtension on ExtendedNavigatorState {
-  Future<T> pushLogin<T>({Key key}) => push<T>(
-        LOGIN_ROUTE,
-        arguments: LoginViewArguments(key: key),
-      );
+  Future<T> pushLogin<T>({Key key}) => push<T>(LOGIN_ROUTE, arguments: LoginViewArgs(key: key));
 
-  Future<T> pushSignup<T>({Key key}) => push<T>(
-        SIGNUP_ROUTE,
-        arguments: SignupViewArguments(key: key),
-      );
+  Future<T> pushSignup<T>({Key key}) => push<T>(SIGNUP_ROUTE, arguments: SignupViewArgs(key: key));
 }
 
 /// ************************************************************************
 /// Arguments holder classes
 /// *************************************************************************
 
-class LoginViewArguments {
+class LoginViewArgs {
   final Key key;
-  LoginViewArguments({this.key});
+  LoginViewArgs({this.key});
 }
 
-class SignupViewArguments {
+class SignupViewArgs {
   final Key key;
-  SignupViewArguments({this.key});
+  SignupViewArgs({this.key});
 }
