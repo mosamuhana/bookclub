@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "978054018183",
+    "firebase_url": "https://book-club-8317a.firebaseio.com",
+    "project_id": "book-club-8317a",
+    "storage_bucket": "book-club-8317a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:978054018183:android:435802341a5868015a3422",
+        "android_client_info": {
+          "package_name": "com.mytec.bookclub"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "978054018183-cjis5f6qhqece4s6qlgru0gosj2e9sdc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmuAW3BQ_OTNbKs5rH0LyRdR_TGKXZ94w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "978054018183-cjis5f6qhqece4s6qlgru0gosj2e9sdc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
