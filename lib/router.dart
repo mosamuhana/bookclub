@@ -1,15 +1,33 @@
-import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
+import 'package:flutter/material.dart';
 
+import 'services/auth.guard.dart';
+import 'services/no_auth.guard.dart';
 import 'views.dart';
 
-const String LOGIN_ROUTE = '/login';
-const String SIGNUP_ROUTE = '/signup';
-
-class _Routes {
-  final String login = LOGIN_ROUTE;
-  final String signup = SIGNUP_ROUTE;
+class Routes {
+  static const String startup = '/startup';
+  static const String initial = startup;
+  static const String home = '/home';
+  static const String login = '/login';
+  static const String signup = '/signup';
   //Set<String> get all => {LOGIN_ROUTE, SIGNUP_ROUTE};
+}
+
+Route<dynamic> _onStartup(RouteData data) {
+  var args = data.getArgs<StartupViewArgs>(orElse: () => StartupViewArgs());
+  return MaterialPageRoute<dynamic>(
+    builder: (context) => StartupView(key: args.key),
+    settings: data,
+  );
+}
+
+Route<dynamic> _onHome(RouteData data) {
+  var args = data.getArgs<HomeViewArgs>(orElse: () => HomeViewArgs());
+  return MaterialPageRoute<dynamic>(
+    builder: (context) => HomeView(key: args.key),
+    settings: data,
+  );
 }
 
 Route<dynamic> _onLogin(RouteData data) {
@@ -32,39 +50,33 @@ Route<dynamic> _onSignup(RouteData data) {
   );
 }
 
-class _Router extends RouterBase {
+class Router extends RouterBase {
   @override
   List<RouteDef> get routes => [
-        RouteDef(LOGIN_ROUTE, page: LoginView),
-        RouteDef(SIGNUP_ROUTE, page: SignupView),
+        RouteDef(Routes.startup, page: StartupView),
+        RouteDef(Routes.home, page: HomeView, guards: [AuthGuard]),
+        RouteDef(Routes.login, page: LoginView, guards: [NoAuthGuard]),
+        RouteDef(Routes.signup, page: SignupView, guards: [NoAuthGuard]),
       ];
 
   @override
   Map<Type, AutoRouteFactory> get pagesMap => {
+        StartupView: _onStartup,
+        HomeView: _onHome,
         LoginView: _onLogin,
         SignupView: _onSignup,
       };
 }
 
-class Router {
-  static _Router _instance;
-  static _Router get instance => _instance ??= _Router();
-  static _Routes get routes => _Routes();
+class StartupViewArgs {
+  final Key key;
+  StartupViewArgs({this.key});
 }
 
-/// ************************************************************************
-/// Navigation helper methods extension
-/// *************************************************************************
-
-extension ExtendedNavigatorStateExtension on ExtendedNavigatorState {
-  Future<T> pushLogin<T>({Key key}) => push<T>(LOGIN_ROUTE, arguments: LoginViewArgs(key: key));
-
-  Future<T> pushSignup<T>({Key key}) => push<T>(SIGNUP_ROUTE, arguments: SignupViewArgs(key: key));
+class HomeViewArgs {
+  final Key key;
+  HomeViewArgs({this.key});
 }
-
-/// ************************************************************************
-/// Arguments holder classes
-/// *************************************************************************
 
 class LoginViewArgs {
   final Key key;
