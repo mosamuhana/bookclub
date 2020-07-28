@@ -1,14 +1,18 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/services.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
-import '../models.dart';
 import '../app.dart';
+import '../models.dart';
 
 class AuthService {
   FirebaseAuth _auth = FirebaseAuth.instance;
+  FirebaseMessaging _fcm = FirebaseMessaging();
+
   StreamController<AuthUser> _authStreamController;
   //Stream<AuthUser> _user$;
   AuthUser _user;
@@ -48,37 +52,83 @@ class AuthService {
     return false;
   }
 
-  Future<bool> signIn({String email, String password}) async {
-    try {
-      final res = await _auth.signInWithEmailAndPassword(email: email, password: password).timeout(
-            Duration(seconds: 10),
-            onTimeout: () => throw Exception('Connection timeout, Cannot reach host'),
-          );
-      if (res.user != null) {
-        showAuthResult(res);
-      }
-      return res.user != null;
-    } catch (e) {
-      final msg = e.message ?? e.toString();
-      print('[AuthService.signIn] error: (${e.runtimeType}) $msg');
-      rethrow;
+  Future<void> signUp({String email, String password, String fullName}) async {
+    final authResult = await _auth.createUserWithEmailAndPassword(
+      email: email.trim(),
+      password: password,
+    );
+
+    final user = User(
+      uid: authResult.user.uid,
+      email: authResult.user.email,
+      fullName: fullName.trim(),
+      accountCreated: Timestamp.now(),
+      notifToken: await _fcm.getToken(),
+    );
+
+    final ok = await Locator.firestore.createUser(user);
+
+    if (!ok) {
+      throw Exception("Cannot save user ${user.email} to database");
     }
   }
 
-  Future<bool> signUp({String email, String password, String fullName}) async {
-    try {
-      final res = await _auth.createUserWithEmailAndPassword(email: email, password: password);
-      if (res.user != null) {
-        showAuthResult(res);
-        return true;
-      }
-    } catch (e) {
-      print('[AuthService.signUp] error: $e');
+  Future<void> signIn({String email, String password}) async {
+    final res = await _auth
+        .signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        )
+        .timeout(
+          Duration(seconds: 10),
+          onTimeout: () => throw Exception('Connection timeout, Cannot reach host'),
+        );
+    showAuthResult(res);
+    if (res?.user == null) {
+      throw Exception('Invalid email/password');
     }
-    return false;
+  }
+
+  Future<void> signInWithGoogle() async {
+    final googleSignIn = GoogleSignIn(
+      scopes: [
+        'email',
+        'https://www.googleapis.com/auth/contacts.readonly',
+      ],
+    );
+
+    GoogleSignInAccount googleUser = await googleSignIn.signIn();
+    GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+    final AuthCredential credential = GoogleAuthProvider.getCredential(
+      idToken: googleAuth.idToken,
+      accessToken: googleAuth.accessToken,
+    );
+
+    final authResult = await _auth.signInWithCredential(credential);
+
+    if (authResult.additionalUserInfo.isNewUser) {
+      final user = User(
+        uid: authResult.user.uid,
+        email: authResult.user.email,
+        fullName: authResult.user.displayName,
+        accountCreated: Timestamp.now(),
+        notifToken: await _fcm.getToken(),
+      );
+
+      final ok = await Locator.firestore.createUser(user);
+
+      if (!ok) {
+        throw Exception("Cannot save user ${user.email} to database");
+      }
+    }
   }
 
   showAuthResult(AuthResult res) {
+    if (res?.user == null) {
+      print('user = null');
+      return;
+    }
     final userInfo = res.additionalUserInfo;
     final user = res.user;
     print('additionalUserInfo.isNewUser: ${userInfo.isNewUser}');

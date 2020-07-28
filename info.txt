@@ -1,0 +1,35 @@
+Launching lib\main.dart on Android SDK built for x86 in debug mode...
+Plugin project :firebase_core_web not found. Please update settings.gradle.
+Plugin project :firebase_auth_web not found. Please update settings.gradle.
+
+# https://developers.google.com/android/guides/client-auth
+$ keytool -list -v -alias androiddebugkey -keystore %USERPROFILE%\.android\debug.keystore
+Enter keystore password:                               (default android)
+
+*****************  WARNING WARNING WARNING  *****************
+* The integrity of the information stored in your keystore  *
+* has NOT been verified!  In order to verify its integrity, *
+* you must provide your keystore password.                  *
+*****************  WARNING WARNING WARNING  *****************
+
+Alias name: androiddebugkey
+Creation date: Jul 12, 2019
+Entry type: PrivateKeyEntry
+Certificate chain length: 1
+Certificate[1]:
+Owner: C=US, O=Android, CN=Android Debug
+Issuer: C=US, O=Android, CN=Android Debug
+Serial number: 1
+Valid from: Fri Jul 12 16:30:20 EEST 2019 until: Sun Jul 04 16:30:20 EEST 2049
+Certificate fingerprints:
+         MD5:  BC:CF:52:6C:09:55:8C:05:38:3B:D2:90:67:46:F3:A5
+         SHA1: 45:0F:8A:6E:78:FB:68:2F:8A:C7:9D:2F:E1:35:D9:6F:19:2B:27:A7
+         SHA256: 52:80:A5:D5:29:EA:11:4B:AA:9A:6E:34:D8:52:F6:70:79:EA:96:44:D4:0E:A5:16:04:C3:D0:6C:B7:68:C0:01
+Signature algorithm name: SHA1withRSA
+Subject Public Key Algorithm: 1024-bit RSA key
+Version: 1
+
+Warning:
+The JKS keystore uses a proprietary format. It is recommended to migrate to PKCS12 which is an industry standard format using "keytool -importkeystore -srckeystore C:\Users\mousa\.android\debug.keystore -destkeystore C:\Users\mousa\.android\debug.keystore -deststoretype pkcs12".
+
+

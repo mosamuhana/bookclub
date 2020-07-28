@@ -5,7 +5,7 @@ import 'services/auth.guard.dart';
 import 'services/no_auth.guard.dart';
 import 'views.dart';
 
-class Routes {
+abstract class Routes {
   static const String startup = '/startup';
   static const String initial = startup;
   static const String home = '/home';

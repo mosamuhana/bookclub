@@ -3,33 +3,33 @@ import 'package:stacked/stacked.dart';
 
 import '../../app.dart';
 
-const FULL_NAME = 'fullName';
-const EMAIL = 'email';
-const PASSWORD = 'password';
-const PASSWORD_CONFIRM = 'passwordConfirm';
+const F_FULL_NAME = 'fullName';
+const F_EMAIL = 'email';
+const F_PASSWORD = 'password';
+const F_PASSWORD_CONFIRM = 'passwordConfirm';
 
 class SignupViewModel extends BaseViewModel {
   final form = FormGroup(
     {
-      FULL_NAME: FormControl(
+      F_FULL_NAME: FormControl(
         validators: [
           Validators.required,
           Validators.minLength(3),
         ],
       ),
-      EMAIL: FormControl(
+      F_EMAIL: FormControl(
         validators: [
           Validators.required,
           Validators.email,
         ],
       ),
-      PASSWORD: FormControl(
+      F_PASSWORD: FormControl(
         validators: [
           Validators.required,
           Validators.minLength(6),
         ],
       ),
-      PASSWORD_CONFIRM: FormControl(
+      F_PASSWORD_CONFIRM: FormControl(
         validators: [
           Validators.required,
           Validators.minLength(6),
@@ -37,39 +37,40 @@ class SignupViewModel extends BaseViewModel {
       ),
     },
     validators: [
-      Validators.mustMatch(PASSWORD, PASSWORD_CONFIRM),
+      Validators.mustMatch(F_PASSWORD, F_PASSWORD_CONFIRM),
     ],
   );
 
-  FormControl get fullNameControl => form.control(FULL_NAME);
-  FormControl get emailControl => form.control(EMAIL);
-  FormControl get passwordControl => form.control(PASSWORD);
-  FormControl get passwordConfirmControl => form.control(PASSWORD_CONFIRM);
+  FormControl get fullNameControl => form.control(F_FULL_NAME);
+  FormControl get emailControl => form.control(F_EMAIL);
+  FormControl get passwordControl => form.control(F_PASSWORD);
+  FormControl get passwordConfirmControl => form.control(F_PASSWORD_CONFIRM);
 
-  Future<void> submit() async {
-    String fullName = fullNameControl.value;
-    String email = emailControl.value;
-    String password = passwordControl.value;
-    String msg;
+  bool get canSubmit => form.valid && !isBusy;
+
+  Future<void> _submit() async {
     setBusy(true);
     try {
-      //await Future.delayed(Duration(seconds: 10));
-      final ok = await Locator.auth.signUp(email: email, password: password, fullName: fullName);
-      if (ok) {
-        await Locator.snackbar
-            .showCustomSnackBar(message: 'Successfully created.', duration: Duration(seconds: 3));
-        await Locator.navigation.replaceWith(Routes.login);
-        return;
-      }
-      msg = 'Unknown Error';
+      await Locator.auth.signUp(
+        email: emailControl.value,
+        password: passwordControl.value,
+        fullName: fullNameControl.value,
+      );
+      Locator.snackbar.showSnackbar(
+        message: 'Successfully created.',
+        duration: Duration(seconds: 3),
+      );
+      Locator.navigation.replaceWith(Routes.login);
+      return;
     } catch (e) {
-      msg = e.message ?? e.toString();
+      String msg = e.message ?? e.toString();
+      Locator.snackbar.showSnackbar(message: msg, title: 'Error', duration: Duration(seconds: 2));
     } finally {
       setBusy(false);
     }
-    Locator.snackbar
-        .showCustomSnackBar(message: msg, title: 'Error', duration: Duration(seconds: 2));
   }
+
+  Function get submit => !canSubmit ? null : _submit;
 
   void onFulNameSubmitted() => emailControl.focus();
 
@@ -83,9 +84,9 @@ class SignupViewModel extends BaseViewModel {
     }
   }
 
-  void navigateToLogin() {
-    Locator.navigation.replaceWith(Routes.login);
-  }
+  void _navigateToLogin() => Locator.navigation.replaceWith(Routes.login);
+
+  Function get navigateToLogin => isBusy ? null : _navigateToLogin;
 
   @override
   void dispose() {

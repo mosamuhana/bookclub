@@ -16,7 +16,7 @@ class Application extends StatelessWidget {
     return MaterialApp(
       title: 'Book Club',
       theme: AppTheme.build(),
-      initialRoute: Routes.signup,
+      initialRoute: Routes.initial,
       onGenerateRoute: Router().onGenerateRoute,
       navigatorKey: Locator.navigation.navigatorKey,
     );

@@ -6,7 +6,7 @@ import '../../widgets.dart';
 import 'signup.viewmodel.dart';
 
 final _buttonStyle = TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold);
-final _box20 = SizedBox(height: 20);
+final _verticalSpacer = SizedBox(height: 10);
 
 class SignupView extends ViewModelBuilderWidget<SignupViewModel> {
   SignupView({Key key}) : super(key: key);
@@ -55,7 +55,7 @@ class SignupView extends ViewModelBuilderWidget<SignupViewModel> {
               ),
             ),
             ReactiveTextField(
-              formControlName: FULL_NAME,
+              formControlName: F_FULL_NAME,
               decoration: InputDecoration(
                 labelText: 'Full Name',
                 prefixIcon: Icon(Icons.person_outline),
@@ -63,9 +63,9 @@ class SignupView extends ViewModelBuilderWidget<SignupViewModel> {
               textInputAction: TextInputAction.next,
               onSubmitted: model.onFulNameSubmitted,
             ),
-            _box20,
+            _verticalSpacer,
             ReactiveTextField(
-              formControlName: EMAIL,
+              formControlName: F_EMAIL,
               decoration: InputDecoration(
                 labelText: 'Email',
                 prefixIcon: Icon(Icons.alternate_email),
@@ -77,9 +77,9 @@ class SignupView extends ViewModelBuilderWidget<SignupViewModel> {
               textInputAction: TextInputAction.next,
               onSubmitted: model.onEmailSubmitted, //() => model.passwordControl.focus(),
             ),
-            _box20,
+            _verticalSpacer,
             ReactiveTextField(
-              formControlName: PASSWORD,
+              formControlName: F_PASSWORD,
               decoration: InputDecoration(
                 labelText: 'Password',
                 prefixIcon: Icon(Icons.lock_outline),
@@ -92,9 +92,9 @@ class SignupView extends ViewModelBuilderWidget<SignupViewModel> {
               textInputAction: TextInputAction.next,
               onSubmitted: model.onPasswordSubmitted, // onSubmitted: () {},
             ),
-            _box20,
+            _verticalSpacer,
             ReactiveTextField(
-              formControlName: PASSWORD_CONFIRM,
+              formControlName: F_PASSWORD_CONFIRM,
               decoration: InputDecoration(
                 labelText: 'Password Confirm',
                 prefixIcon: Icon(Icons.lock_outline),
@@ -108,17 +108,17 @@ class SignupView extends ViewModelBuilderWidget<SignupViewModel> {
               textInputAction: TextInputAction.next,
               onSubmitted: model.onPasswordConfirmSubmitted, // onSubmitted: () {},
             ),
-            _box20,
+            _verticalSpacer,
             ReactiveFormConsumer(
               builder: (context, form, child) {
                 return RaisedButton(
                   child: Text('Register', style: _buttonStyle),
-                  onPressed: (form.valid && !model.isBusy) ? model.submit : null,
+                  onPressed: model.submit,
                 );
               },
             ),
             FlatButton(
-              onPressed: model.isBusy ? null : model.navigateToLogin,
+              onPressed: model.navigateToLogin,
               child: Text("You have an account? login here"),
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),

@@ -8,7 +8,7 @@ import 'login.viewmodel.dart';
 
 final _buttonStyle = TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold);
 
-final _box10 = SizedBox(height: 10);
+final _spacerBox = SizedBox(height: 10);
 
 final _logo = Container(
   height: 150,
@@ -38,7 +38,7 @@ class LoginView extends ViewModelBuilderWidget<LoginViewModel> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _logo,
-                  _box10,
+                  _spacerBox,
                   _buildForm(context, model),
                 ],
               ),
@@ -65,20 +65,10 @@ class LoginView extends ViewModelBuilderWidget<LoginViewModel> {
               ),
             ),
             ReactiveTextField(
-              formControlName: 'email',
+              formControlName: F_EMAIL,
               decoration: InputDecoration(
                 labelText: 'Email',
-                suffixIcon: ReactiveStatusListenableBuilder(
-                  formControlName: 'email',
-                  builder: (context, control, child) {
-                    return control.pending
-                        ? Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Container(width: 0);
-                  },
-                ),
+                prefixIcon: Icon(Icons.alternate_email),
               ),
               validationMessages: {
                 ValidationMessage.required: 'The email must not be empty',
@@ -87,11 +77,12 @@ class LoginView extends ViewModelBuilderWidget<LoginViewModel> {
               textInputAction: TextInputAction.next,
               onSubmitted: model.onEmailSubmitted, //() => model.passwordControl.focus(),
             ),
-            SizedBox(height: 20),
+            _spacerBox,
             ReactiveTextField(
-              formControlName: 'password',
+              formControlName: F_PASSWORD,
               decoration: InputDecoration(
                 labelText: 'Password',
+                prefixIcon: Icon(Icons.lock_outline),
               ),
               obscureText: true,
               validationMessages: {
@@ -101,20 +92,45 @@ class LoginView extends ViewModelBuilderWidget<LoginViewModel> {
               textInputAction: TextInputAction.next,
               onSubmitted: model.onPasswordSubmitted, // onSubmitted: () {},
             ),
-            SizedBox(height: 20),
-            ReactiveFormConsumer(
-              builder: (context, form, child) {
-                return RaisedButton(
-                  child: Text('Login', style: _buttonStyle),
-                  onPressed: (form.valid && !model.isBusy) ? model.submit : null,
-                );
-              },
+            _spacerBox,
+            RaisedButton(
+              child: Text('Login', style: _buttonStyle),
+              onPressed: model.submit,
             ),
             FlatButton(
-              onPressed: model.isBusy ? null : model.navigateToSignup,
+              onPressed: model.navigateToSignup,
               child: Text("Don't have an account? sign up here"),
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
+            SizedBox(height: 20),
+            _buildGoogleButton(context, model),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGoogleButton(BuildContext context, LoginViewModel model) {
+    return OutlineButton(
+      splashColor: Colors.grey,
+      onPressed: model.submitWithGoogle,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      highlightElevation: 10,
+      borderSide: BorderSide(color: Colors.grey),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Image(image: AssetImage(Images.googleLogo), height: 25.0),
+            Padding(
+              padding: const EdgeInsets.only(left: 10),
+              child: Text(
+                'Sign in with Google',
+                style: TextStyle(fontSize: 20, color: Colors.grey),
+              ),
+            )
           ],
         ),
       ),

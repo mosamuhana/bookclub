@@ -8,7 +8,11 @@ class HomeViewModel extends BaseViewModel {
       await Locator.auth.signOut();
       await Locator.navigation.replaceWith(Routes.login);
     } catch (e) {
-      await Locator.snackbar.showCustomSnackBar(message: 'Logout error');
+      Locator.snackbar.showSnackbar(
+        message: 'Logout error',
+        title: 'Error',
+        duration: Duration(seconds: 3),
+      );
     }
   }
 }

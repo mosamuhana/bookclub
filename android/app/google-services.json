@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "978054018183-1ijj55mf2vjgqjehjisdoak5crp8fu7n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mytec.bookclub",
+            "certificate_hash": "450f8a6e78fb682f8ac79d2fe135d96f192b27a7"
+          }
+        },
+        {
           "client_id": "978054018183-cjis5f6qhqece4s6qlgru0gosj2e9sdc.apps.googleusercontent.com",
           "client_type": 3
         }
