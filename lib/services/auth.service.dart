@@ -12,6 +12,12 @@ import '../models.dart';
 class AuthService {
   FirebaseAuth _auth = FirebaseAuth.instance;
   FirebaseMessaging _fcm = FirebaseMessaging();
+  GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: [
+      'email',
+      'https://www.googleapis.com/auth/contacts.readonly',
+    ],
+  );
 
   StreamController<AuthUser> _authStreamController;
   //Stream<AuthUser> _user$;
@@ -54,14 +60,14 @@ class AuthService {
 
   Future<void> signUp({String email, String password, String fullName}) async {
     final authResult = await _auth.createUserWithEmailAndPassword(
-      email: email.trim(),
+      email: email,
       password: password,
     );
 
     final user = User(
       uid: authResult.user.uid,
       email: authResult.user.email,
-      fullName: fullName.trim(),
+      fullName: fullName,
       accountCreated: Timestamp.now(),
       notifToken: await _fcm.getToken(),
     );
@@ -90,14 +96,7 @@ class AuthService {
   }
 
   Future<void> signInWithGoogle() async {
-    final googleSignIn = GoogleSignIn(
-      scopes: [
-        'email',
-        'https://www.googleapis.com/auth/contacts.readonly',
-      ],
-    );
-
-    GoogleSignInAccount googleUser = await googleSignIn.signIn();
+    GoogleSignInAccount googleUser = await _googleSignIn.signIn();
     GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
     final AuthCredential credential = GoogleAuthProvider.getCredential(

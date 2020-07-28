@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 
+import '../../models.dart';
 import 'home.viewmodel.dart';
 
 class HomeView extends ViewModelBuilderWidget<HomeViewModel> {
@@ -22,7 +23,13 @@ class HomeView extends ViewModelBuilderWidget<HomeViewModel> {
         ],
       ),
       body: Center(
-        child: Text('Home'),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Home'),
+            Text('email: ${model.user?.email}'),
+          ],
+        ),
       ),
     );
   }

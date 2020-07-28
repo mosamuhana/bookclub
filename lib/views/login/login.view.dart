@@ -2,19 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:stacked/stacked.dart';
 
-import '../../r.dart';
 import '../../widgets.dart';
 import 'login.viewmodel.dart';
 
 final _buttonStyle = TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold);
 
 final _spacerBox = SizedBox(height: 10);
-
-final _logo = Container(
-  height: 150,
-  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 10),
-  child: Image.asset(Images.logo),
-);
 
 class LoginView extends ViewModelBuilderWidget<LoginViewModel> {
   LoginView({Key key}) : super(key: key);
@@ -37,7 +30,7 @@ class LoginView extends ViewModelBuilderWidget<LoginViewModel> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _logo,
+                  LogoImage(),
                   _spacerBox,
                   _buildForm(context, model),
                 ],
@@ -75,7 +68,7 @@ class LoginView extends ViewModelBuilderWidget<LoginViewModel> {
                 ValidationMessage.email: 'The email value must be a valid email',
               },
               textInputAction: TextInputAction.next,
-              onSubmitted: model.onEmailSubmitted, //() => model.passwordControl.focus(),
+              onSubmitted: model.onEmailSubmitted,
             ),
             _spacerBox,
             ReactiveTextField(
@@ -90,7 +83,7 @@ class LoginView extends ViewModelBuilderWidget<LoginViewModel> {
                 ValidationMessage.minLength: 'The password must be at least 6 characters',
               },
               textInputAction: TextInputAction.next,
-              onSubmitted: model.onPasswordSubmitted, // onSubmitted: () {},
+              onSubmitted: model.onPasswordSubmitted,
             ),
             _spacerBox,
             RaisedButton(
@@ -103,34 +96,8 @@ class LoginView extends ViewModelBuilderWidget<LoginViewModel> {
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             SizedBox(height: 20),
-            _buildGoogleButton(context, model),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGoogleButton(BuildContext context, LoginViewModel model) {
-    return OutlineButton(
-      splashColor: Colors.grey,
-      onPressed: model.submitWithGoogle,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      highlightElevation: 10,
-      borderSide: BorderSide(color: Colors.grey),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Image(image: AssetImage(Images.googleLogo), height: 25.0),
-            Padding(
-              padding: const EdgeInsets.only(left: 10),
-              child: Text(
-                'Sign in with Google',
-                style: TextStyle(fontSize: 20, color: Colors.grey),
-              ),
-            )
+            GoogleLoginButton(onPressed: model.submitWithGoogle),
+            //_buildGoogleButton(context, model),
           ],
         ),
       ),

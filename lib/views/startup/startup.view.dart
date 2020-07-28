@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app.dart';
+import '../../widgets.dart';
 
 class StartupView extends StatefulWidget {
   const StartupView({Key key}) : super(key: key);
@@ -32,6 +33,8 @@ class _StartupViewState extends State<StartupView> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            LogoImage(),
+            SizedBox(height: 50),
             CircularProgressIndicator(backgroundColor: Colors.blue),
             SizedBox(height: 20),
             Text('Loading ...'),

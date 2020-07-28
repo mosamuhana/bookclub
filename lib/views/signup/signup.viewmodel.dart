@@ -11,25 +11,25 @@ const F_PASSWORD_CONFIRM = 'passwordConfirm';
 class SignupViewModel extends BaseViewModel {
   final form = FormGroup(
     {
-      F_FULL_NAME: FormControl(
+      F_FULL_NAME: FormControl<String>(
         validators: [
           Validators.required,
           Validators.minLength(3),
         ],
       ),
-      F_EMAIL: FormControl(
+      F_EMAIL: FormControl<String>(
         validators: [
           Validators.required,
           Validators.email,
         ],
       ),
-      F_PASSWORD: FormControl(
+      F_PASSWORD: FormControl<String>(
         validators: [
           Validators.required,
           Validators.minLength(6),
         ],
       ),
-      F_PASSWORD_CONFIRM: FormControl(
+      F_PASSWORD_CONFIRM: FormControl<String>(
         validators: [
           Validators.required,
           Validators.minLength(6),
@@ -41,10 +41,10 @@ class SignupViewModel extends BaseViewModel {
     ],
   );
 
-  FormControl get fullNameControl => form.control(F_FULL_NAME);
-  FormControl get emailControl => form.control(F_EMAIL);
-  FormControl get passwordControl => form.control(F_PASSWORD);
-  FormControl get passwordConfirmControl => form.control(F_PASSWORD_CONFIRM);
+  FormControl<String> get fullNameControl => form.control(F_FULL_NAME);
+  FormControl<String> get emailControl => form.control(F_EMAIL);
+  FormControl<String> get passwordControl => form.control(F_PASSWORD);
+  FormControl<String> get passwordConfirmControl => form.control(F_PASSWORD_CONFIRM);
 
   bool get canSubmit => form.valid && !isBusy;
 
@@ -52,9 +52,9 @@ class SignupViewModel extends BaseViewModel {
     setBusy(true);
     try {
       await Locator.auth.signUp(
-        email: emailControl.value,
-        password: passwordControl.value,
-        fullName: fullNameControl.value,
+        email: emailControl.value.trim(),
+        password: passwordControl.value.trim(),
+        fullName: fullNameControl.value.trim(),
       );
       Locator.snackbar.showSnackbar(
         message: 'Successfully created.',
