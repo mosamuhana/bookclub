@@ -8,106 +8,83 @@ class FirestoreService {
 
   CollectionReference get usersCollection => _firestore.collection("users");
   CollectionReference get groupsCollection => _firestore.collection("groups");
+  CollectionReference get notificationsCollection => _firestore.collection("notifications");
 
   Future<String> createGroup(String groupName, User user, Book initialBook) async {
-    String retVal = "error";
-    List<String> members = List();
-    List<String> tokens = List();
-
+    String result = "error";
     try {
-      members.add(user.uid);
-      tokens.add(user.notifToken);
-      DocumentReference _docRef;
+      final groupData = <String, dynamic>{
+        'name': groupName.trim(),
+        'leader': user.uid,
+        'members': <String>[user.uid],
+        'groupCreated': Timestamp.now(),
+        'nextBookId': "waiting",
+        'indexPickingBook': 0,
+      };
+
       if (user.notifToken != null) {
-        _docRef = await groupsCollection.add({
-          'name': groupName.trim(),
-          'leader': user.uid,
-          'members': members,
-          'tokens': tokens,
-          'groupCreated': Timestamp.now(),
-          'nextBookId': "waiting",
-          'indexPickingBook': 0
-        });
-      } else {
-        _docRef = await groupsCollection.add({
-          'name': groupName.trim(),
-          'leader': user.uid,
-          'members': members,
-          'groupCreated': Timestamp.now(),
-          'nextBookId': "waiting",
-          'indexPickingBook': 0
-        });
+        groupData['tokens'] = <String>[user.notifToken];
       }
 
-      await usersCollection.document(user.uid).updateData({
-        'groupId': _docRef.documentID,
-      });
+      final groupRef = await groupsCollection.add(groupData);
+      final groupId = groupRef.documentID;
+
+      await usersCollection.document(user.uid).updateData({'groupId': groupId});
 
       //add a book
-      addBook(_docRef.documentID, initialBook);
+      addBook(groupId, initialBook);
 
-      retVal = "success";
+      result = "success";
     } catch (e) {
       print(e);
     }
 
-    return retVal;
+    return result;
   }
 
-  Future<String> joinGroup(String groupId, User userModel) async {
-    String retVal = "error";
-    List<String> members = List();
-    List<String> tokens = List();
+  Future<String> joinGroup(String groupId, User user) async {
+    String result = "error";
     try {
-      members.add(userModel.uid);
-      tokens.add(userModel.notifToken);
       await groupsCollection.document(groupId).updateData({
-        'members': FieldValue.arrayUnion(members),
-        'tokens': FieldValue.arrayUnion(tokens),
+        'members': FieldValue.arrayUnion(<String>[user.uid]),
+        'tokens': FieldValue.arrayUnion(<String>[user.notifToken]),
       });
 
-      await usersCollection.document(userModel.uid).updateData({
-        'groupId': groupId.trim(),
-      });
+      await usersCollection.document(user.uid).updateData({'groupId': groupId});
 
-      retVal = "success";
+      result = "success";
     } on PlatformException catch (e) {
-      retVal = "Make sure you have the right group ID!";
+      result = "Make sure you have the right group ID!";
       print(e);
     } catch (e) {
       print(e);
     }
 
-    return retVal;
+    return result;
   }
 
-  Future<String> leaveGroup(String groupId, User userModel) async {
-    String retVal = "error";
-    List<String> members = List();
-    List<String> tokens = List();
+  Future<String> leaveGroup(String groupId, User user) async {
+    String result = "error";
     try {
-      members.add(userModel.uid);
-      tokens.add(userModel.notifToken);
       await groupsCollection.document(groupId).updateData({
-        'members': FieldValue.arrayRemove(members),
-        'tokens': FieldValue.arrayRemove(tokens),
+        'members': FieldValue.arrayRemove(<String>[user.uid]),
+        'tokens': FieldValue.arrayRemove(<String>[user.notifToken]),
       });
 
-      await usersCollection.document(userModel.uid).updateData({
-        'groupId': null,
-      });
+      await usersCollection.document(user.uid).updateData({'groupId': null});
+      result = 'success';
     } catch (e) {
       print(e);
     }
 
-    return retVal;
+    return result;
   }
 
   Future<String> addBook(String groupId, Book book) async {
-    String retVal = "error";
+    String result = "error";
 
     try {
-      DocumentReference _docRef = await groupsCollection.document(groupId).collection("books").add({
+      final bookRef = await groupsCollection.document(groupId).collection("books").add({
         'name': book.name.trim(),
         'author': book.author.trim(),
         'length': book.length,
@@ -116,23 +93,23 @@ class FirestoreService {
 
       //add current book to group schedule
       await groupsCollection.document(groupId).updateData({
-        "currentBookId": _docRef.documentID,
+        "currentBookId": bookRef.documentID,
         "currentBookDue": book.dateCompleted,
       });
 
-      retVal = "success";
+      result = "success";
     } catch (e) {
       print(e);
     }
 
-    return retVal;
+    return result;
   }
 
   Future<String> addNextBook(String groupId, Book book) async {
     String retVal = "error";
 
     try {
-      DocumentReference _docRef = await groupsCollection.document(groupId).collection("books").add({
+      DocumentReference bookRef = await groupsCollection.document(groupId).collection("books").add({
         'name': book.name.trim(),
         'author': book.author.trim(),
         'length': book.length,
@@ -141,13 +118,13 @@ class FirestoreService {
 
       //add current book to group schedule
       await groupsCollection.document(groupId).updateData({
-        "nextBookId": _docRef.documentID,
+        "nextBookId": bookRef.documentID,
         "nextBookDue": book.dateCompleted,
       });
 
       //adding a notification document
-      DocumentSnapshot doc = await groupsCollection.document(groupId).get();
-      createNotifications(List<String>.from(doc.data["tokens"]) ?? [], book.name, book.author);
+      final groupDoc = await groupsCollection.document(groupId).get();
+      createNotifications(List<String>.from(groupDoc.data["tokens"]) ?? [], book.name, book.author);
 
       retVal = "success";
     } catch (e) {
@@ -158,10 +135,10 @@ class FirestoreService {
   }
 
   Future<String> addCurrentBook(String groupId, Book book) async {
-    String retVal = "error";
+    String result = "error";
 
     try {
-      DocumentReference _docRef = await groupsCollection.document(groupId).collection("books").add({
+      DocumentReference bookRef = await groupsCollection.document(groupId).collection("books").add({
         'name': book.name.trim(),
         'author': book.author.trim(),
         'length': book.length,
@@ -170,34 +147,34 @@ class FirestoreService {
 
       //add current book to group schedule
       await groupsCollection.document(groupId).updateData({
-        "currentBookId": _docRef.documentID,
+        "currentBookId": bookRef.documentID,
         "currentBookDue": book.dateCompleted,
       });
 
       //adding a notification document
-      DocumentSnapshot doc = await groupsCollection.document(groupId).get();
-      createNotifications(List<String>.from(doc.data["tokens"]) ?? [], book.name, book.author);
+      DocumentSnapshot groupDoc = await groupsCollection.document(groupId).get();
+      createNotifications(List<String>.from(groupDoc.data["tokens"]) ?? [], book.name, book.author);
 
-      retVal = "success";
+      result = "success";
     } catch (e) {
       print(e);
     }
 
-    return retVal;
+    return result;
   }
 
   Future<Book> getCurrentBook(String groupId, String bookId) async {
-    Book retVal;
+    Book result;
 
     try {
-      DocumentSnapshot _docSnapshot =
+      DocumentSnapshot bookDoc =
           await groupsCollection.document(groupId).collection("books").document(bookId).get();
-      retVal = Book.fromDocumentSnapshot(doc: _docSnapshot);
+      result = Book.fromDocumentSnapshot(doc: bookDoc);
     } catch (e) {
       print(e);
     }
 
-    return retVal;
+    return result;
   }
 
   Future<String> finishedBook(
@@ -207,7 +184,11 @@ class FirestoreService {
     int rating,
     String review,
   ) async {
-    String retVal = "error";
+    String result = "error";
+    final data = <String, dynamic>{
+      'rating': rating,
+      'review': review,
+    };
     try {
       await groupsCollection
           .document(groupId)
@@ -215,20 +196,17 @@ class FirestoreService {
           .document(bookId)
           .collection("reviews")
           .document(uid)
-          .setData({
-        'rating': rating,
-        'review': review,
-      });
+          .setData(data);
+      result = "success";
     } catch (e) {
       print(e);
     }
-    return retVal;
+    return result;
   }
 
   Future<bool> isUserDoneWithBook(String groupId, String bookId, String uid) async {
-    bool retVal = false;
     try {
-      DocumentSnapshot _docSnapshot = await groupsCollection
+      final doc = await groupsCollection
           .document(groupId)
           .collection("books")
           .document(bookId)
@@ -236,19 +214,17 @@ class FirestoreService {
           .document(uid)
           .get();
 
-      if (_docSnapshot.exists) {
-        retVal = true;
-      }
+      return doc.exists;
     } catch (e) {
       print(e);
     }
-    return retVal;
+    return false;
   }
 
   Future<bool> createUser(User user) async {
     try {
-      final userDocRef = usersCollection.document(user.uid);
-      await userDocRef.setData({
+      final userRef = usersCollection.document(user.uid);
+      await userRef.setData({
         'fullName': user.fullName.trim(),
         'email': user.email.trim(),
         'accountCreated': Timestamp.now(),
@@ -263,71 +239,74 @@ class FirestoreService {
   }
 
   Future<User> getUser(String uid) async {
-    User retVal;
-
     try {
-      DocumentSnapshot _docSnapshot = await usersCollection.document(uid).get();
-      retVal = User.fromDocumentSnapshot(doc: _docSnapshot);
+      final userDoc = await usersCollection.document(uid).get();
+      return User.fromDocumentSnapshot(doc: userDoc);
     } catch (e) {
       print(e);
     }
-
-    return retVal;
+    return null;
   }
 
   Future<String> createNotifications(List<String> tokens, String bookName, String author) async {
-    String retVal = "error";
+    String result = "error";
 
     try {
-      await _firestore.collection("notifications").add({
+      await notificationsCollection.add({
         'bookName': bookName.trim(),
         'author': author.trim(),
         'tokens': tokens,
       });
-      retVal = "success";
+      result = "success";
     } catch (e) {
       print(e);
     }
 
-    return retVal;
+    return result;
   }
 
   Future<List<Book>> getBookHistory(String groupId) async {
-    List<Book> retVal = List();
-
     try {
-      QuerySnapshot query = await groupsCollection
+      final query = await groupsCollection
           .document(groupId)
           .collection("books")
           .orderBy("dateCompleted", descending: true)
           .getDocuments();
 
-      query.documents.forEach((element) {
-        retVal.add(Book.fromDocumentSnapshot(doc: element));
-      });
+      return query.documents.map((doc) => Book.fromDocumentSnapshot(doc: doc)).toList();
     } catch (e) {
       print(e);
     }
-    return retVal;
+    return <Book>[];
   }
 
   Future<List<Review>> getReviewHistory(String groupId, String bookId) async {
-    List<Review> retVal = List();
-
     try {
-      QuerySnapshot query = await groupsCollection
+      final query = await groupsCollection
           .document(groupId)
           .collection("books")
           .document(bookId)
           .collection("reviews")
           .getDocuments();
 
-      query.documents.forEach((element) {
-        retVal.add(Review.fromDocumentSnapshot(doc: element));
-      });
+      return query.documents.map((doc) => Review.fromDocumentSnapshot(doc: doc)).toList();
     } catch (e) {
       print(e);
     }
-    return retVal;
+    return <Review>[];
+  }
+
+  Stream<User> getCurrentUser(String uid) {
+    return usersCollection
+        .document(uid)
+        .snapshots()
+        .map((doc) => User.fromDocumentSnapshot(doc: doc));
+  }
+
+  Stream<Group> getCurrentGroup(String groupId) {
+    return groupsCollection
+        .document(groupId)
+        .snapshots()
+        .map((doc) => Group.fromDocumentSnapshot(doc: doc));
   }
 }
